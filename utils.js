@@ -1,6 +1,5 @@
 import * as THREE from 'three'
-import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-
+import { BufferGeometryUtils } from 'bufferGeometryUtils';
 function makeObject(position/*THREE.Vector3*/, rotation/*THREE.Quaternion */, id/*can be furniture, interactable, or room*/, name, cornerOfAlignment /*br bl tr tl*/, mat) {
     if (name === null) return;
     function geometryFromCubes(rawCubes) {
@@ -93,26 +92,22 @@ function makeObject(position/*THREE.Vector3*/, rotation/*THREE.Quaternion */, id
     }
     if (!full) return null;
 
-    // 1. define corner offset based on orient
-    if (orient === 0) {   // bl (bottom left)
+    if (orient === 0) {   // bl
         cornerOffsetX = -halfW;
         cornerOffsetZ = -halfD;
-    } else if (orient === 1) { // br (bottom right)
+    } else if (orient === 1) { // br 
         cornerOffsetX =  halfW;
         cornerOffsetZ = -halfD;
-    } else if (orient === 2) { // tl (top left)
+    } else if (orient === 2) { // tl 
         cornerOffsetX = -halfW;
         cornerOffsetZ =  halfD;
-    } else if (orient === 3) { // tr (top right)
+    } else if (orient === 3) { // tr 
         cornerOffsetX =  halfW;
         cornerOffsetZ =  halfD;
     }
 
-    // 2. shift so that the chosen corner is at (0,0,0)
     shift.makeTranslation(-cornerOffsetX, 0, -cornerOffsetZ);
     full.applyMatrix4(shift);
-
-    // 3. apply rotation (orient 90° steps + extra quaternion)
     if (orient === 1) {
         quat.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2);      // 90°
     } else if (orient === 2) {
@@ -127,8 +122,6 @@ function makeObject(position/*THREE.Vector3*/, rotation/*THREE.Quaternion */, id
     if (rotation) {
         full.applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(rotation));
     }
-
-    // 4. assign output
     output = full;
 
     return output;
