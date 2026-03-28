@@ -14,6 +14,11 @@ scene.add(light);
 const fog = new THREE.Fog(0x222222, dist - (dist * 0.2), dist);
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
+window.addEventListener('resize', () => {
+    cam.aspect = window.innerWidth / window.innerHeight;
+    cam.updateProjectionMatrix();
+    render.setSize(window.innerWidth, window.innerHeight);
+});
 document.body.appendChild(renderer.domElement);
 let keys = {};
 window.addEventListener('keydown', (e) => {
