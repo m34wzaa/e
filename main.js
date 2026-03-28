@@ -15,6 +15,14 @@ const fog = new THREE.Fog(0x222222, dist - (dist * 0.2), dist);
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+let keys = {};
+window.addEventListener('keydown', (e) => {
+    keys[e.key] = true;
+    console.log(e.key);
+});
+window.addEventListener('keyup', (e) => {
+    keys[e.key] = false;
+});
 const playerGeo = new THREE.BoxGeometry(0.8, 1.8, 0.8)
 const playerMat = new THREE.MeshStandardMaterial({
     metalness: 0.3,
@@ -34,14 +42,6 @@ const chair = new THREE.Mesh(
     ),
     chairMat
 );
-console.log(makeObject(
-    new THREE.Vector3(4, 0, 4),
-    null,
-    "1",
-    "chair",
-    "bl",
-    chairMat
-));
 scene.add(chair);
 let room = 1
 const rooms = [
@@ -54,6 +54,14 @@ const rooms = [
 ]
 function anim() {
     requestAnimationFrame(anim);
+    console.log('test');
+    if (keys['a']) {
+        cam.rotation.z -=0.01
+    }
+    if (keys['d']) {
+        cam.rotation.z += 0.01
+    }
+    console.log('running...')
     renderer.render(scene, cam);
 }
 anim();
