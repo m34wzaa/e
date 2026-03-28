@@ -9,7 +9,9 @@ function makeObject(position/*THREE.Vector3*/, rotation/*THREE.Quaternion */, id
             const mesh = new THREE.Mesh(cube.geometry);
             mesh.position.copy(cube.position);
             mesh.updateMatrix();
-            geometries.push(mesh.geometry);
+            const cloned = cube.geometry.clone();
+            cloned.applyMatrix4(mesh.matrix);
+            geometries.push(cloned);
         }
 
         return BufferGeometryUtils.mergeBufferGeometries(geometries, false);
