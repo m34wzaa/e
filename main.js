@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { makeObject } from './utils.js?v=2';
+import { makeObject } from './utils.js?v=4';
+import { BufferGeometryUtils } from 'bufferGeometryUtils';
 // make object, call function = pos, rot, id, name, corner, mat
 
 const scene = new THREE.Scene();
@@ -11,6 +12,8 @@ cam.rotation.order = 'YXZ';
 const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(5, 5, 5);
 scene.add(light);
+const light2 = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(light2);
 scene.fog = new THREE.Fog(0x222222, dist - (dist * 0.2), dist);
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -22,10 +25,20 @@ window.addEventListener('resize', () => {
 document.body.appendChild(renderer.domElement);
 let keys = {};
 window.addEventListener('keydown', (e) => {
-    keys[e.key] = true;
+    keys[e.key.toLowerCase()] = true;
 });
 window.addEventListener('keyup', (e) => {
-    keys[e.key] = false;
+    keys[e.key.toLowerCase()] = false;
+});
+renderer.domElement.addEventListener('click', () => {
+    renderer.domElement.requestPointerLock();
+});
+const mouseSens = 0.002; 
+document.addEventListener('mousemove', (e) => {
+    if (document.pointerLockElement !== renderer.domElement) return;
+    yaw   -= e.movementX * mouseSens;
+    pitch -= e.movementY * mouseSens;
+    pitch  = Math.max(-lim, Math.min(lim, pitch));
 });
 const playerGeo = new THREE.BoxGeometry(0.8, 1.8, 0.8)
 const playerMat = new THREE.MeshStandardMaterial({
@@ -35,19 +48,38 @@ const playerMat = new THREE.MeshStandardMaterial({
 });
 const player = new THREE.Mesh(playerGeo, playerMat);
 scene.add(player);
-const chairMat = new THREE.MeshStandardMaterial({ color: 0x884400 });
-const chair = new THREE.Mesh(
-    makeObject(
-        new THREE.Vector3(2, 0, 4),
-        null,
-        "1",
-        "chair",
-        "bl",
-        chairMat
-    ),
+const player2 = new THREE.Mesh(playerGeo, playerMat)
+//scene.add(player2)
+player.position.z += 5
+//player2.position.x += 0.45
+const chairMat = new THREE.MeshStandardMaterial({ color: 0x147983 });
+const chair = makeObject(
+    new THREE.Vector3(2, 0, 0),
+    null,
+    "1",
+    "chair",
+    "bl",
     chairMat
 );
 scene.add(chair);
+const couch = makeObject(
+    new THREE.Vector3(4, 0, 0),
+    null,
+    "1",
+    "couch",
+    "bl",
+    chairMat
+);
+scene.add(couch);
+const light3 = makeObject(
+    new THREE.Vector3(0, 5, 0),
+    null,
+    "2",
+    "light",
+    "bl",
+    chairMat
+);
+scene.add(light3);
 let room = 1
 const rooms = [
     [
@@ -65,24 +97,19 @@ const xx = new THREE.Vector3(1, 0, 0);
 let yaw   = 0;
 let pitch = 0;
 const sens = 0.02;
-const lim = Math.PI / 2
+const lim = Math.PI / 2;
 
 function anim() {
     requestAnimationFrame(anim);
-    if (keys['ArrowLeft']) yaw   += sens;
-    if (keys['ArrowRight']) yaw   -= sens;
-    if (keys['ArrowUp']) pitch += sens;
-    if (keys['ArrowDown']) pitch -= sens;
     pitch = Math.max(-lim, Math.min(lim, pitch));
     yawQ.setFromAxisAngle(yy, yaw);
     pitchQ.setFromAxisAngle(xx, pitch);
-    cam.quaternion.multiplyQuaternions(yawQ, pitchQ);
     const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(yawQ);
-    const right   = new THREE.Vector3(1, 0, 0).applyQuaternion(yawQ);
-    if (keys['w'])    player.position.addScaledVector(forward, sens * 5);
-    if (keys['s'])  player.position.addScaledVector(forward, -sens * 5);
-    if (keys['a'])  player.position.addScaledVector(right,   -sens * 5);
-    if (keys['d']) player.position.addScaledVector(right,   sens * 5);
+    const right   = new THREE.Vector3(1, 0,  0).applyQuaternion(yawQ);
+    if (keys['w']) player.position.addScaledVector(forward,  sens * 5);
+    if (keys['s']) player.position.addScaledVector(forward, -sens * 5);
+    if (keys['a']) player.position.addScaledVector(right,   -sens * 5);
+    if (keys['d']) player.position.addScaledVector(right,    sens * 5);
     cam.position.copy(player.position).add(new THREE.Vector3(0, 0.8, 0));
     player.quaternion.copy(yawQ);
     cam.quaternion.multiplyQuaternions(yawQ, pitchQ);

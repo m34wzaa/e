@@ -4,7 +4,6 @@ function makeObject(position/*THREE.Vector3*/, rotation/*THREE.Quaternion */, id
     if (name === null) return;
     function geometryFromCubes(rawCubes) {
         const geometries = [];
-
         for (const cube of rawCubes) {
             const mesh = new THREE.Mesh(cube.geometry);
             mesh.position.copy(cube.position);
@@ -13,87 +12,131 @@ function makeObject(position/*THREE.Vector3*/, rotation/*THREE.Quaternion */, id
             cloned.applyMatrix4(mesh.matrix);
             geometries.push(cloned);
         }
-
         return BufferGeometryUtils.mergeBufferGeometries(geometries, false);
     }
-
     let output = null;
     let full = null;
     let halfW = 0;   
     let halfD = 0;   
-
     let orient = 0;
     if (cornerOfAlignment == "bl") orient = 0;
     else if (cornerOfAlignment == "br") orient = 1;
     else if (cornerOfAlignment == "tl") orient = 2;
     else if (cornerOfAlignment == "tr") orient = 3;
-
     let cornerOffsetX = 0;
     let cornerOffsetZ = 0;
-
     const shift = new THREE.Matrix4();
     const quat  = new THREE.Quaternion();
-
-    let arr = [];
-
-    if (id == "1") {
-        // furniture
-        let geo = new THREE.BufferGeometry();
-
+    if (id == "1") {//chair, couch, bed, desk, 
         if (name === "chair") {
-            arr = [
-                new THREE.BoxGeometry(1, 0.5, 1),      // seat
-                new THREE.BoxGeometry(0.2, 0.7, 1),    // arms
-                new THREE.BoxGeometry(1.4, 1, 0.2),    // back
-                new THREE.BoxGeometry(0.1, 0.1, 0.1)   // legs
-            ];
-
+            const LEG_H = 0.1;
+            const SEAT_H = 0.5;
+            const BACK_H = 0.5;
             const rawCubes = [];
-
+            // Seat — bottom face at y = LEG_H, so center at y = LEG_H + SEAT_H/2
             rawCubes.push({
-                geometry: arr[0],
-                position: new THREE.Vector3(0, 0, 0)
+                geometry: new THREE.BoxGeometry(1, SEAT_H, 1),
+                position: new THREE.Vector3(0, LEG_H + SEAT_H / 2, 0)
             });
-
+            // Left armrest
             rawCubes.push({
-                geometry: arr[1],
-                position: new THREE.Vector3(0, 0.25, 0)
+                geometry: new THREE.BoxGeometry(0.2, 0.3, 1),
+                position: new THREE.Vector3(-0.4, LEG_H + SEAT_H + 0.15, 0)
             });
-
+            // Right armrest
             rawCubes.push({
-                geometry: arr[2],
-                position: new THREE.Vector3(0, 0.5, -0.6)
+                geometry: new THREE.BoxGeometry(0.2, 0.3, 1),
+                position: new THREE.Vector3(0.4, LEG_H + SEAT_H + 0.15, 0)
             });
-
-           const legPositions = [
-                [-0.4, 0.05, -0.4], // front left
-                [ 0.4, 0.05, -0.4], // front right
-                [ 0.4, 0.05,  0.4], // back right
-                [-0.4, 0.05,  0.4], // back left
+            // Back — centered above seat, at back edge z = -0.5
+            rawCubes.push({
+                geometry: new THREE.BoxGeometry(1, BACK_H, 0.2),
+                position: new THREE.Vector3(0, LEG_H + SEAT_H + BACK_H / 2, -0.4)
+            });
+            // Legs — y center = LEG_H / 2, so bottom face is at y = 0
+            const legGeo = new THREE.BoxGeometry(0.1, LEG_H, 0.1);
+            const legPositions = [
+                [-0.4, LEG_H / 2,  0.4],
+                [ 0.4, LEG_H / 2,  0.4],
+                [-0.4, LEG_H / 2, -0.4],
+                [ 0.4, LEG_H / 2, -0.4],
             ];
-
             for (const [x, y, z] of legPositions) {
                 rawCubes.push({
-                    geometry: arr[3],
+                    geometry: legGeo.clone(),   // clone per leg to avoid shared geometry issues
                     position: new THREE.Vector3(x, y, z)
                 });
             }
-
             full = geometryFromCubes(rawCubes);
             full.computeVertexNormals();
+            full.computeBoundingSphere();
             halfD = 0.7;
             halfW = 0.7;
+        } else if (name == "couch") {
+            halfD = 0.7
+            halfW = 1.2
+            const LEG_H = 0.1
+            const SEAT_H = 0.5;
+            const BACK_H = 0.5;
+            const rawCubes = [];
+            rawCubes.push({
+                geometry: new THREE.BoxGeometry(2.4, SEAT_H, 1),
+                position: new THREE.Vector3(0, LEG_H + SEAT_H / 2, 0)
+            });
+            // Left armrest
+            rawCubes.push({
+                geometry: new THREE.BoxGeometry(0.2, 0.3, 1),
+                position: new THREE.Vector3(-1.1, LEG_H + SEAT_H + 0.15, 0)
+            });
+            // Right armrest
+            rawCubes.push({
+                geometry: new THREE.BoxGeometry(0.2, 0.3, 1),
+                position: new THREE.Vector3(1.1, LEG_H + SEAT_H + 0.15, 0)
+            });
+            // Back
+            rawCubes.push({
+                geometry: new THREE.BoxGeometry(2.4, BACK_H, 0.2),
+                position: new THREE.Vector3(0, LEG_H + SEAT_H + BACK_H / 2, -0.4)
+            });
+            // Legs
+            const legGeo = new THREE.BoxGeometry(0.1, LEG_H, 0.1);
+            const legPositions = [
+                [-1.1, LEG_H / 2,  0.4],
+                [ 1.1, LEG_H / 2,  0.4],
+                [-1.1, LEG_H / 2, -0.4],
+                [ 1.1, LEG_H / 2, -0.4],
+            ];
+            for (const [x, y, z] of legPositions) {
+                rawCubes.push({
+                    geometry: legGeo.clone(),
+                    position: new THREE.Vector3(x, y, z)
+                });
+            }
+            full = geometryFromCubes(rawCubes);
+            full.computeVertexNormals();
+            full.computeBoundingSphere();
         }
-    } else if (id == "2") {
+    } else if (id == "2") {//door, window, lights
         // interactable
-
-    } else if (id == "3") {
+        if (name === "light") {
+            const radius = 0.075
+            const rawCubes = [];
+            rawCubes.push({
+                geometry: new THREE.CylinderGeometry(radius, radius, 0.002, 8, 1),
+                position: new THREE.Vector3(0, 0, 0)
+            });
+            halfD = 0
+            halfW = 0
+            full = geometryFromCubes(rawCubes);
+            full.computeVertexNormals();
+            full.computeBoundingSphere();
+        }
+    } else if (id == "3") {//walls, floors, 
         // rooms
     } else {
         return null;
     }
     if (!full) return null;
-
     if (orient === 0) {   // bl
         cornerOffsetX = -halfW;
         cornerOffsetZ = -halfD;
@@ -107,7 +150,6 @@ function makeObject(position/*THREE.Vector3*/, rotation/*THREE.Quaternion */, id
         cornerOffsetX =  halfW;
         cornerOffsetZ =  halfD;
     }
-
     shift.makeTranslation(-cornerOffsetX, 0, -cornerOffsetZ);
     full.applyMatrix4(shift);
     if (orient === 1) {
@@ -120,12 +162,33 @@ function makeObject(position/*THREE.Vector3*/, rotation/*THREE.Quaternion */, id
     if (orient !== 0) {
         full.applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(quat));
     }
-
     if (rotation) {
         full.applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(rotation));
     }
-    output = full;
-
-    return output;
+    let mesh;
+    if (name == "light")  {
+        const newmat = new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            emissive: 0xffffff,
+            emissiveIntensity: 5
+        })
+        mesh = new THREE.Mesh(full, newmat);
+    } else {
+        mesh = new THREE.Mesh(full, mat)
+    }
+    const group = new THREE.Group();
+    if (name == "light") {
+        const light = new THREE.PointLight(
+            0xffffff,
+            5,
+            10,
+            1.5
+        )
+        light.position.set(0, 0, 0);
+        group.add(light);
+    }
+    group.add(mesh);
+    if (position) group.position.copy(position);
+    return group;
 }
 export { makeObject };
