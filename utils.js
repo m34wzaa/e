@@ -119,6 +119,8 @@ function makeObject(position/*THREE.Vector3*/, rotation/*THREE.Quaternion */, id
     } else if (id == "2") {//door, window, lights
         // interactable
         if (name === "light") {
+            halfD = 0
+            halfW = 0
             const radius = 0.075
             const rawCubes = [];
             rawCubes.push({
@@ -131,8 +133,96 @@ function makeObject(position/*THREE.Vector3*/, rotation/*THREE.Quaternion */, id
             full.computeVertexNormals();
             full.computeBoundingSphere();
         }
+        if (name == "lightswitch") {
+            const rawCubes = []
+            halfW = 0.1
+            halfD = 0.1
+            rawCubes.push({
+                geometry: new THREE.BoxGeometry(0.1, 0.2, 0.05),
+                position: new THREE.Vector3(0, 0, 0)
+            })
+            full = geometryFromCubes(rawCubes);
+            full.computeVertexNormals();
+            full.computeBoundingSphere();
+        }
     } else if (id == "3") {//walls, floors, 
         // rooms
+        const wallSizeX = 10
+        const wallSizeY = 10
+        if (name === "wallX") {
+            const rawCubes = []
+            halfW = 0.25
+            halfD = wallSizeX / 2
+            rawCubes.push({
+                geometry: new THREE.BoxGeometry(0.5, wallSizeY, wallSizeX),
+                position: new THREE.Vector3(0, wallSizeY / 2, 0)
+            });
+            full = geometryFromCubes(rawCubes);
+            full.computeVertexNormals();
+            full.computeBoundingSphere();
+        }
+        if (name === "wallZ") {
+            const rawCubes = []
+            halfW = wallSizeX / 2
+            halfD = 0.25
+            rawCubes.push({
+                geometry: new THREE.BoxGeometry(wallSizeX, wallSizeY, 0.5),
+                position: new THREE.Vector3(0, wallSizeY / 2, 0)
+            });
+            full = geometryFromCubes(rawCubes);
+            full.computeVertexNormals();
+            full.computeBoundingSphere();
+        }
+        if (name === "flat") {
+            const rawCubes = []
+            halfW = 5;
+            halfD = 0.25;
+            rawCubes.push({
+                geometry: new THREE.BoxGeometry(wallSizeX, 0.5, wallSizeX),
+                position: new THREE.Vector3(0, 0.25, 0)
+            });
+            full = geometryFromCubes(rawCubes);
+            full.computeVertexNormals();
+            full.computeBoundingSphere();
+        }
+        const windowSizeX = 2; //(width)
+        const windowSizeY = 2; //(height)
+        if (name === "window") {
+            const rawCubes = []
+            halfD = 5;
+            halfW = 0.25;
+            rawCubes.push({//top
+                geometry: new THREE.BoxGeometry(wallSizeX, (wallSizeY / 2) - (windowSizeY / 2), 0.5),
+                position: new THREE.Vector3(0, (wallSizeY / 2) - (2.5 - windowSizeY / 4), 0)
+            });
+            rawCubes.push({//bottom
+                geometry: new THREE.BoxGeometry(wallSizeX, (wallSizeY / 2) - (windowSizeY / 2) / 2, 0.5),
+                position: new THREE.Vector3(0, -(wallSizeY / 2) + (2.5 - windowSizeY / 4), 0)
+            });
+            rawCubes.push({//right
+                geometry: new THREE.BoxGeometry(wallSizeX / 2 - (windowSizeX / 2), wallSizeY, 0.5),
+                position: new THREE.Vector3(wallSizeX / 2 - (2.5 - windowSizeX / 4), 0, 0)
+            });
+            rawCubes.push({//left
+                geometry: new THREE.BoxGeometry(wallSizeX / 2 - (windowSizeX / 2), wallSizeY, 0.5),
+                position: new THREE.Vector3(-wallSizeX / 2 + (2.5 - windowSizeX / 4), 0, 0)
+            });
+            full = geometryFromCubes(rawCubes);
+            full.computeVertexNormals();
+            full.computeBoundingSphere();
+        }
+        if (name == "windowFrame") {
+            const rawCubes = []
+            rawCubes.push({
+                geometry: new THREE.BoxGeometry(windowSizeX, windowSizeY, 0.25),
+                position: new THREE.Vector3(0, 0, 0),
+            });
+            full = geometryFromCubes(rawCubes);
+            full.computeVertexNormals();
+            full.computeBoundingSphere();
+            halfD = 5;
+            halfW = 0.25;
+        }
     } else {
         return null;
     }
@@ -173,6 +263,14 @@ function makeObject(position/*THREE.Vector3*/, rotation/*THREE.Quaternion */, id
             emissiveIntensity: 5
         })
         mesh = new THREE.Mesh(full, newmat);
+    } else if (name == "windowFrame") {
+        const newmat = new THREE.MeshBasicMaterial({ 
+            color: 0xaaffff,
+            transparent: true,
+            opacity: 0.07
+        });
+        mesh = new THREE.Mesh(full, newmat);
+        mesh = new THREE.Mesh(full, newmat)
     } else {
         mesh = new THREE.Mesh(full, mat)
     }
@@ -189,6 +287,7 @@ function makeObject(position/*THREE.Vector3*/, rotation/*THREE.Quaternion */, id
     }
     group.add(mesh);
     if (position) group.position.copy(position);
+    if (name === "light") group.userData.pointLight = group.children.find(c => c.isPointLight);
     return group;
 }
-export { makeObject };
+export { makeObject }
