@@ -124,8 +124,8 @@ function makeObject(position/*THREE.Vector3*/, rotation/*THREE.Quaternion */, id
             const radius = 0.075
             const rawCubes = [];
             rawCubes.push({
-                geometry: new THREE.CylinderGeometry(radius, radius, 0.002, 8, 1),
-                position: new THREE.Vector3(0, 0, 0)
+                geometry: new THREE.CylinderGeometry(radius, radius, 0.002, 32, 1),
+                position: new THREE.Vector3(0, 0, 0),
             });
             halfD = 0
             halfW = 0
@@ -147,8 +147,8 @@ function makeObject(position/*THREE.Vector3*/, rotation/*THREE.Quaternion */, id
         }
     } else if (id == "3") {//walls, floors, 
         // rooms
-        const wallSizeX = 10
-        const wallSizeY = 10
+        const wallSizeX = 4
+        const wallSizeY = 4
         if (name === "wallX") {
             const rawCubes = []
             halfW = 0.25
@@ -192,20 +192,20 @@ function makeObject(position/*THREE.Vector3*/, rotation/*THREE.Quaternion */, id
             halfD = 5;
             halfW = 0.25;
             rawCubes.push({//top
-                geometry: new THREE.BoxGeometry(wallSizeX, (wallSizeY / 2) - (windowSizeY / 2), 0.5),
-                position: new THREE.Vector3(0, (wallSizeY / 2) - (2.5 - windowSizeY / 4), 0)
+                geometry: new THREE.BoxGeometry(wallSizeX, wallSizeY / 2 - windowSizeY / 2, 0.5),
+                position: new THREE.Vector3(0 - (wallSizeX / 2) + 3.75,  (windowSizeY / 2 + (wallSizeY / 2 - windowSizeY / 2) / 2) + (wallSizeY / 2), -4.75)
             });
             rawCubes.push({//bottom
-                geometry: new THREE.BoxGeometry(wallSizeX, (wallSizeY / 2) - (windowSizeY / 2) / 2, 0.5),
-                position: new THREE.Vector3(0, -(wallSizeY / 2) + (2.5 - windowSizeY / 4), 0)
+                geometry: new THREE.BoxGeometry(wallSizeX, wallSizeY / 2 - windowSizeY / 2, 0.5),
+                position: new THREE.Vector3(0 - (wallSizeX / 2) + 3.75, -(windowSizeY / 2 + (wallSizeY / 2 - windowSizeY / 2) / 2) + (wallSizeY / 2), -4.75)
             });
             rawCubes.push({//right
-                geometry: new THREE.BoxGeometry(wallSizeX / 2 - (windowSizeX / 2), wallSizeY, 0.5),
-                position: new THREE.Vector3(wallSizeX / 2 - (2.5 - windowSizeX / 4), 0, 0)
+                geometry: new THREE.BoxGeometry(wallSizeX / 2 - windowSizeX / 2, windowSizeY, 0.5),
+                position: new THREE.Vector3( (windowSizeX / 2 + (wallSizeX / 2 - windowSizeX / 2) / 2) - (wallSizeX / 2) + 3.75, 0 + (wallSizeY / 2), -4.75)
             });
             rawCubes.push({//left
-                geometry: new THREE.BoxGeometry(wallSizeX / 2 - (windowSizeX / 2), wallSizeY, 0.5),
-                position: new THREE.Vector3(-wallSizeX / 2 + (2.5 - windowSizeX / 4), 0, 0)
+                geometry: new THREE.BoxGeometry(wallSizeX / 2 - windowSizeX / 2, windowSizeY, 0.5),
+                position: new THREE.Vector3(-(windowSizeX / 2 + (wallSizeX / 2 - windowSizeX / 2) / 2) - (wallSizeX / 2) + 3.75, 0 + (wallSizeY / 2), -4.75)
             });
             full = geometryFromCubes(rawCubes);
             full.computeVertexNormals();
@@ -215,7 +215,7 @@ function makeObject(position/*THREE.Vector3*/, rotation/*THREE.Quaternion */, id
             const rawCubes = []
             rawCubes.push({
                 geometry: new THREE.BoxGeometry(windowSizeX, windowSizeY, 0.25),
-                position: new THREE.Vector3(0, 0, 0),
+                position: new THREE.Vector3(1.75, 2, -4.75),
             });
             full = geometryFromCubes(rawCubes);
             full.computeVertexNormals();
@@ -258,16 +258,16 @@ function makeObject(position/*THREE.Vector3*/, rotation/*THREE.Quaternion */, id
     let mesh;
     if (name == "light")  {
         const newmat = new THREE.MeshStandardMaterial({
-            color: 0xffffff,
-            emissive: 0xffffff,
-            emissiveIntensity: 5
+            color: 0xffbbaa,
+            emissive: 0xffbbaa,
+            emissiveIntensity: 3
         })
         mesh = new THREE.Mesh(full, newmat);
     } else if (name == "windowFrame") {
         const newmat = new THREE.MeshBasicMaterial({ 
             color: 0xaaffff,
             transparent: true,
-            opacity: 0.07
+            opacity: 0.1
         });
         mesh = new THREE.Mesh(full, newmat);
         mesh = new THREE.Mesh(full, newmat)
@@ -277,9 +277,9 @@ function makeObject(position/*THREE.Vector3*/, rotation/*THREE.Quaternion */, id
     const group = new THREE.Group();
     if (name == "light") {
         const light = new THREE.PointLight(
-            0xffffff,
-            5,
-            10,
+            0xffbbaa,
+            2,
+            20,
             1.5
         )
         light.position.set(0, 0, 0);
